@@ -55,11 +55,13 @@ def anneal_prob(step, k=2, total=150000):
     min_, max_ = 1, np.exp(k*1)
     return (np.exp(k*step/total) - min_) / (max_ - min_)
 
-
-def main(args):
+def main(args):    
     if not os.path.exists('/log'):
-        os.makedirs('/log', exist_ok=True)
+        # os.makedirs('/log', exist_ok=True)
+        log_dir = os.path.join(args.intermediate_dir, 'log')
+        os.makedirs(log_dir, exist_ok=True)
     log_file_name = 'log/' + datetime.now().strftime("%D:%H:%M:%S").replace('/', ':') + '.txt'
+    os.makedirs(os.path.dirname(log_file_name), exist_ok=True)
     with open(log_file_name, 'a+') as f:
         f.write(str(args))
         f.write('\n')
