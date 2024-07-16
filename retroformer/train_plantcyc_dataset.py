@@ -208,12 +208,13 @@ def main(args):
                 entry_count, src_max_length, tgt_max_length = raw_src.shape[1], raw_src.shape[0], raw_tgt.shape[0]
 
 if __name__ == '__main__':
+    
     device = sys.argv[1]
     args.device = device
 
-    # epochs_dict = {'cuda:0' : 100, 'cuda:1' : 300, 'cuda:2' : 500, 'cuda:3' : 700, 'cuda:5' : 1000}
+    epochs_dict = {'cuda:0' : 100, 'cuda:1' : 300, 'cuda:2' : 500, 'cuda:3' : 700, 'cuda:4' : 1000}
 
-    # args.max_epoch = epochs_dict[device]
+    args.max_epoch = epochs_dict[device]
 
     print(args)
     with open('args.pk', 'wb') as f:

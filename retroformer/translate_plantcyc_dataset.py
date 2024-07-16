@@ -169,8 +169,8 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # device = sys.argv[1]
-    device = 'cuda:3'
+    
+    device = sys.argv[1]
     args.device = device
 
     epochs_dict = {'cuda:0' : 100, 'cuda:1' : 300, 'cuda:2' : 500, 'cuda:3' : 700}
