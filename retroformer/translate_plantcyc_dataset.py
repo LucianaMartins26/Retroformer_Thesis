@@ -25,9 +25,9 @@ class Args:
         self.device = 'cuda'
         self.batch_size_trn = 2
         self.batch_size_val = 2
-        self.data_dir = '/home/lmartins/Retroformer/Retroformer_Thesis/data_plantcyc'
-        self.intermediate_dir = '/home/lmartins/Retroformer/Retroformer_Thesis/intermediate'
-        self.checkpoint_dir = '/home/lmartins/Retroformer/Retroformer_Thesis/checkpoint_untyped'
+        self.data_dir = '../data_plantcyc'
+        self.intermediate_dir = '../intermediate'
+        self.checkpoint_dir = '../checkpoint_untyped'
         self.checkpoint = 'model_25000.pt'
         self.encoder_num_layers = 8
         self.decoder_num_layers = 8
@@ -169,7 +169,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    
+
     device = sys.argv[1]
     args.device = device
 

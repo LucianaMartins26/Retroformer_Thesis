@@ -21,7 +21,7 @@ class Args:
         self.data_dir = '../data_plantcyc'
         self.intermediate_dir = '../intermediate'
         self.checkpoint_dir = '../checkpoint_untyped'
-        self.checkpoint = 'model_best.py'
+        self.checkpoint = None
         self.encoder_num_layers = 8
         self.decoder_num_layers = 8
         self.d_model = 256
@@ -208,7 +208,6 @@ def main(args):
                 entry_count, src_max_length, tgt_max_length = raw_src.shape[1], raw_src.shape[0], raw_tgt.shape[0]
 
 if __name__ == '__main__':
-    
     device = sys.argv[1]
     args.device = device
 
