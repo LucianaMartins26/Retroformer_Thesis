@@ -21,7 +21,7 @@ def mols_from_smiles_list(all_smiles):
     return mols
 
 def replace_deuterated(smi):
-    return re.sub('\[2H\]', r'[H]', smi)
+    return re.sub(r'\[2H\]', r'[H]', smi)
 
 def clear_mapnum(mol):
     [a.ClearProp('molAtomMapNumber') for a in mol.GetAtoms() if a.HasProp('molAtomMapNumber')]
@@ -260,10 +260,10 @@ def get_special_groups(mol):
     # Stereo-specific ones (where we will need to include neighbors)
     # Tetrahedral centers should already be okay...
     group_templates += [
-        ((1,2,), '[*]/[CH]=[CH]/[*]'), # trans with two hydrogens
-        ((1,2,), '[*]/[CH]=[CH]\[*]'), # cis with two hydrogens
-        ((1,2,), '[*]/[CH]=[CH0]([*])\[*]'), # trans with one hydrogens
-        ((1,2,), '[*]/[D3;H1]=[!D1]'), # specified on one end, can be N or C
+        ((1,2,), r'[*]/[CH]=[CH]/[*]'), # trans with two hydrogens
+        ((1,2,), r'[*]/[CH]=[CH]\[*]'), # cis with two hydrogens
+        ((1,2,), r'[*]/[CH]=[CH0]([*])\[*]'), # trans with one hydrogens
+        ((1,2,), r'[*]/[D3;H1]=[!D1]'), # specified on one end, can be N or C
     ]
 
     # Build list
@@ -370,7 +370,7 @@ def convert_atom_to_wildcard(atom):
     if False and atom.GetDegree() == 1:
         symbol = '[' + atom.GetSymbol() + ';D1;H{}'.format(atom.GetTotalNumHs())
         if atom.GetFormalCharge() != 0:
-            charges = re.search('([-+]+[1-9]?)', atom.GetSmarts())
+            charges = re.search(r'([-+]+[1-9]?)', atom.GetSmarts())
             symbol = symbol.replace(';D1', ';{};D1'.format(charges.group()))
 
         # symbol = '[' + atom.GetSymbol() + ';D1;H{}'.format(atom.GetTotalNumHs())
@@ -418,7 +418,7 @@ def reassign_atom_mapping(transform):
     the atom-mapping labels (numbers) from left to right, once 
     that transform has been canonicalized.'''
 
-    all_labels = re.findall('\:([0-9]+)\]', transform)
+    all_labels = re.findall(r'\:([0-9]+)\]', transform)
 
     # Define list of replacements which matches all_labels *IN ORDER*
     replacements = []
@@ -431,7 +431,7 @@ def reassign_atom_mapping(transform):
         replacements.append(replacement_dict[label])
 
     # Perform replacements in order
-    transform_newmaps = re.sub('\:[0-9]+\]', 
+    transform_newmaps = re.sub(r'\:[0-9]+\]', 
         lambda match: (':' + replacements.pop(0) + ']'),
         transform)
 
@@ -534,7 +534,7 @@ def expand_changed_atom_tags(changed_atom_tags, reactant_fragments):
     changed_atom_tags list so that those tagged atoms are included in the products'''
 
     expansion = []
-    atom_tags_in_reactant_fragments = re.findall('\:([0-9]+)\]', reactant_fragments)
+    atom_tags_in_reactant_fragments = re.findall(r'\:([0-9]+)\]', reactant_fragments)
     for atom_tag in atom_tags_in_reactant_fragments:
         if atom_tag not in changed_atom_tags:
             expansion.append(atom_tag)
@@ -723,7 +723,7 @@ def canonicalize_template(template):
     an equivalent string without atom mapping.'''
 
     # Strip labels to get sort orders
-    template_nolabels = re.sub('\:[0-9]+\]', ']', template)
+    template_nolabels = re.sub(r'\:[0-9]+\]', ']', template)
 
     # Split into separate molecules *WITHOUT wrapper parentheses*
     template_nolabels_mols = template_nolabels[1:-1].split(').(')
