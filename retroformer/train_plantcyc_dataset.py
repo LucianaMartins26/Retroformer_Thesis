@@ -32,7 +32,7 @@ class Args:
         self.shared_vocab = 'True'
         self.shared_encoder = 'False'
         # self.max_epoch = 30
-        self.max_epoch = 10
+        self.max_epoch = 1000
         self.max_step = 300000
         self.report_per_step = 200
         self.save_per_step = 2500

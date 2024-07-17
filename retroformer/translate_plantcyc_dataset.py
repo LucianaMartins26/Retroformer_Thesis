@@ -137,7 +137,7 @@ def main(args):
     exp_version = 'typed' if args.known_class == 'True' else 'untyped'
     aug_version = '_augment' if 'augment' in args.checkpoint_dir else ''
     tpl_version = '_template' if args.use_template == 'True' else ''
-    file_name = '../result/{}_bs_top{}_generation_{}{}{}_{}_epochs_validation_set.pk'.format(dec_version, args.beam_size, exp_version,
+    file_name = '../result/{}_bs_top{}_generation_{}{}{}_{}_epochs.pk'.format(dec_version, args.beam_size, exp_version,
                                                                     aug_version, tpl_version, args.max_epoch)
     output_path = os.path.join(args.intermediate_dir, file_name)
     print('Output path: {}'.format(output_path))
