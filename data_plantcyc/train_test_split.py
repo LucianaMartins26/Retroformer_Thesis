@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-df = pd.read_csv('../../../data_processing_retroformer_pipeline/data_processing_pipeline/res/retroformer_format_ready_data.csv')
+df = pd.read_csv('../../../../data_processing_retroformer_pipeline/data_processing_pipeline/res/retroformer_format_ready_data.csv')
 
 raw_train, raw_temp = train_test_split(df, test_size=0.4, random_state=42)
 
