@@ -168,7 +168,7 @@ class RetroDataset(Dataset):
                     }
                     try:
                         txn.put(p_key.encode(), pickle.dumps(processed))
-                        print(f"Processed and stored reaction {i}")
+                        # print(f"Processed and stored reaction {i}")
                     except Exception as e:
                         print(f"Error processing index {i} and product {p_key}: {e}")
                 else:

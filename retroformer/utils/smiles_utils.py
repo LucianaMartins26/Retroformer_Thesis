@@ -364,13 +364,13 @@ def clear_map_number(smi):
     return canonical_smiles(Chem.MolToSmiles(mol))
 
 
-def canonical_smiles(smi):
+def canonical_smiles(smi, isomeric=True):
     """Canonicalize a SMILES without atom mapping"""
     mol = Chem.MolFromSmiles(smi)
     if mol is None:
         return smi
     else:
-        canonical_smi = Chem.MolToSmiles(mol)
+        canonical_smi = Chem.MolToSmiles(mol, isomericSmiles=isomeric)
         # print('>>', canonical_smi)
         if '.' in canonical_smi:
             canonical_smi_list = canonical_smi.split('.')
