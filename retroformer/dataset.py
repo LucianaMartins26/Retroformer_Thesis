@@ -107,11 +107,11 @@ class RetroDataset(Dataset):
             print(f"Loaded {len(self.data)} samples from combined data.")
 
         # Build and load processed data into lmdb
-        if 'cooked_{}.lmdb'.format(self.mode) not in os.listdir(self.data_folder):
+        if 'cooked_{}_biochem.lmdb'.format(self.mode) not in os.listdir(self.data_folder):
             print('Building processed data...')
             self.build_processed_data(self.data)
             print('Processed data built.')
-        self.env = lmdb.open(os.path.join(self.data_folder, 'cooked_{}.lmdb'.format(self.mode)),
+        self.env = lmdb.open(os.path.join(self.data_folder, 'cooked_{}_biochem.lmdb'.format(self.mode)),
                              max_readers=1, readonly=True,
                              lock=False, readahead=False, meminit=False)
         print('LMDB environment opened.')
@@ -142,7 +142,7 @@ class RetroDataset(Dataset):
         raw_data.reset_index(inplace=True, drop=True)
         reactions = raw_data['reactants>reagents>production'].to_list()
 
-        env = lmdb.open(os.path.join(self.data_folder, 'cooked_{}.lmdb'.format(self.mode)),
+        env = lmdb.open(os.path.join(self.data_folder, 'cooked_{}_biochem.lmdb'.format(self.mode)),
                         map_size=1099511627776)
 
         with env.begin(write=True) as txn:

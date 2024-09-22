@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,original biochem SMO,0.8729453576188361,0.735627878586094,0.9165329933166504,0.8627408215194474,0.7161731398372619,0.9193953275680542,0.8584248689783904,0.713755707762557,0.9161229133605957

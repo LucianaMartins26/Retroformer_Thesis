@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,1000 epochs biochem 9layers,0.9558676061610868,0.9379965217959291,0.9905226230621338,0.9214983232446797,0.8335430455243225,0.9734092950820923,0.9264552037945499,0.8367237295172043,0.9761449098587036

@@ -1,5 +1,0 @@
-['CC(=O)c1ccc2[nH]ccc2c1.CC(C)(C)OC(=O)OC(=O)OC(C)(C)C']
-[array(['CC(C)(C)OC(=O)OC(=O)OC(C)(C)C.CC(=O)c1ccc2[nH]ccc2c1',
-       'CC(=O)Cl.CC(C)(C)OC(=O)n1ccc2cc(Br)ccc21',
-       'CC(=O)c1ccc2[nH]ccc2c1.CC(C)(C)OC(=O)OC(=O)OC(C)(C)C',
-       'C[Mg+].CC(C)(C)OC(=O)n1ccc2cc(Br)ccc21'], dtype='<U52')]

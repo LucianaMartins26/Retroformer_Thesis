@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,original biochem,0.8756585208917009,0.7413391902153057,0.9097721576690674,0.8732942441946302,0.741852681380074,0.909264862537384,0.8799374346161268,0.7491269628073945,0.9118523597717285
