@@ -215,7 +215,7 @@ def main(args):
                         'accuracy_token': [accuracy_token]
                     })])
  
-                    validation_accuracy_file_name = f'validation_accuracy_overtime_retroformer_readretro_{args.max_epoch}_epochs'
+                    validation_accuracy_file_name = f'validation_accuracy_overtime_retroformer_readretro_{args.max_epoch}_epochs.csv'
                     
                     validation_accuracy_overtime.to_csv(validation_accuracy_file_name, index=False)
 
