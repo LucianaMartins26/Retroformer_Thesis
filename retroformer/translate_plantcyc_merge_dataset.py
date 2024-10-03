@@ -205,12 +205,12 @@ def main(args):
         _, _, model = load_checkpoint(args, model)
 
         # Get Output Path:
-        file_name = f'../result/output_biochem_merge_dataset_{mode}_data.txt'
+        file_name = f'../result/output_biochem_merge_dataset'
 
-        # if args.data_dir.endswith('_sm_only'):
-        #     file_name += '_SMO'
+        if args.data_dir.endswith('_plantcyc'):
+            file_name += '_plantcyc'
 
-        # file_name += f'_{mode}_data.txt'
+        file_name += f'_{mode}_data.txt'
         output_path = os.path.join(args.intermediate_dir, file_name)
 
         # Begin Translating:
@@ -278,14 +278,16 @@ if __name__ == "__main__":
     if predictions == 'True':
         device = sys.argv[2]
 
-        allowed_devices = [f'cuda:{i}' for i in range(5)]
+        allowed_devices = [f'cuda:{i}' for i in range(5)]  
 
         if device in allowed_devices:
             args.device = device
         else:
             raise ValueError(f"Invalid device {device}. Allowed devices are: {', '.join(allowed_devices)}")
 
-        main(args)
+        for data in ['plantcyc', 'merge_dataset']:
+            args.data_dir = f'../data_{data}'
+            main(args)
 
     else:
         device = sys.argv[2]

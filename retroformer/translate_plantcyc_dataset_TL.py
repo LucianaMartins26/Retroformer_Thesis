@@ -240,7 +240,7 @@ def main(args):
             for j in range(args.beam_size):
                 f.write('\n')
                 f.write('Top-{}: {}'.format(j + 1, round(np.mean(accuracy_matrix[:, j]), 4)))
-            return
+    return
     
 def test_strings_accuracies(max_epoch, checkpoint, checkpoint_dir, data_dir, times=None):
     class Args:
