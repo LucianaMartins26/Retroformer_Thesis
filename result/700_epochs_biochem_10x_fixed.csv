@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,700 epochs biochem 10x fixed,0.9691246332262121,0.9478161503301168,0.9919230341911316,0.9172545899889045,0.8311609765731072,0.9778502583503723,0.9209908626037387,0.8230264143406402,0.9772634506225586

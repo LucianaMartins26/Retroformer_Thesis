@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,merge dataset accuracies readretro training data,0.9581160254321313,0.921791685377912,0.9638189673423767,0.8980816172173136,0.7730143109033502,0.9487642049789429,0.8980816172173136,0.7730143109033502,0.9487642049789429

@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,700 epochs biochem plantcyc 10x lowerLR,0.9677397656491733,0.9456346905949689,0.9919368624687195,0.9221943348870563,0.8372801167677479,0.9763979911804199,0.9251145169972679,0.8379447605558134,0.9784688949584961
