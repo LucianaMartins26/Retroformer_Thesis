@@ -6,6 +6,7 @@ import torch
 import torch.optim as optim
 import sys
 import csv
+import pandas as pd
 from tqdm import tqdm
 
 from retroformer.utils.build_utils import build_model, build_iterator, load_checkpoint, accumulate_batch
@@ -18,9 +19,9 @@ class Args:
         self.batch_size_trn = 2
         self.batch_size_val = 2
         self.batch_size_token = 4096
-        self.data_dir = '../data_plantcyc'
+        self.data_dir = None
         self.intermediate_dir = '../intermediate'
-        self.checkpoint_dir = '../checkpoint_untyped'
+        self.checkpoint_dir = '../checkpoint'
         self.checkpoint = None
         self.encoder_num_layers = 8
         self.decoder_num_layers = 8
@@ -31,12 +32,11 @@ class Args:
         self.known_class = 'False'
         self.shared_vocab = 'True'
         self.shared_encoder = 'False'
-        # self.max_epoch = 30
         self.max_epoch = 1000
-        self.max_step = 300000
+        self.max_step = 1600000
         self.report_per_step = 200
         self.save_per_step = 2500
-        self.val_per_step = 2500
+        self.val_per_step = 10000
         self.verbose = 'False'
 
 args = Args()
@@ -47,6 +47,9 @@ def anneal_prob(step, k=2, total=150000):
     return (np.exp(k * step / total) - min_) / (max_ - min_)
 
 def main(args):
+
+    validation_accuracy_overtime = pd.DataFrame()
+
     if not os.path.exists('/log'):
         log_dir = os.path.join(args.intermediate_dir, 'log')
         os.makedirs(log_dir, exist_ok=True)
@@ -156,7 +159,8 @@ def main(args):
                 loss_history_brc.append(loss_bond_rc.item())
                 loss_history_align.append(loss_context_align.item())
 
-                csv_file_name = 'log_training_file_{}_{}.csv'.format(args.device.replace(':', ''), args.max_epoch)
+                csv_file_name = f'log_training_file_{args.max_epoch}.csv'
+
                 if not os.path.exists(csv_file_name):
                     with open(csv_file_name, 'w', newline='') as csvfile:
                         csv_writer = csv.writer(csvfile)
@@ -198,6 +202,19 @@ def main(args):
                     accuracy_arc, accuracy_brc, accuracy_token = validate(model, val_iter, model.embedding_tgt.word_padding_idx)
                     print_line = 'Validation accuracy: {} - {} - {}'.format(round(accuracy_arc, 4), round(accuracy_brc, 4), round(accuracy_token, 4))
                     print(print_line)
+
+                    validation_accuracy_overtime = pd.concat([validation_accuracy_overtime, pd.DataFrame({
+                        'epoch': [epoch],
+                        'global_step': [global_step],
+                        'accuracy_arc': [accuracy_arc],
+                        'accuracy_brc': [accuracy_brc],
+                        'accuracy_token': [accuracy_token]
+                    })])
+ 
+                    validation_accuracy_file_name = f'validation_accuracy_overtime_{args.max_epoch}.csv'
+
+                    validation_accuracy_overtime.to_csv(validation_accuracy_file_name, index=False)
+                    
                     with open(log_file_name, 'a+') as f:
                         f.write(print_line)
                         f.write('\n')
@@ -207,23 +224,26 @@ def main(args):
                 true_batch = [batch]
                 entry_count, src_max_length, tgt_max_length = raw_src.shape[1], raw_src.shape[0], raw_tgt.shape[0]
 
-if __name__ == '__main__':
-    device = sys.argv[1]
-    args.device = device
+if __name__ == "__main__":
 
-    epochs_dict = {'cuda:0' : 100, 'cuda:1' : 300, 'cuda:2' : 500, 'cuda:3' : 700, 'cuda:4' : 1000}
+    predictions = sys.argv[1]
+    
+    if predictions == 'True':
+        device = sys.argv[2]
 
-    args.max_epoch = epochs_dict[device]
+        allowed_devices = [f'cuda:{i}' for i in range(5)]
 
-    print(args)
-    with open('args.pk', 'wb') as f:
-        pickle.dump(args, f)
+        epochs_dict = {'cuda:0' : 100, 'cuda:1' : 300, 'cuda:2' : 500, 'cuda:3' : 700, 'cuda:4' : 1000}
 
-    if args.known_class == 'True':
-        args.checkpoint_dir = args.checkpoint_dir + '_{}_{}'.format(args.device.replace(':', ''), args.max_epoch)
-    else:
-        args.checkpoint_dir = args.checkpoint_dir + '_{}_{}'.format(args.device.replace(':', ''), args.max_epoch)
-    if not os.path.exists(args.checkpoint_dir):
-        os.makedirs(args.checkpoint_dir, exist_ok=True)
+        args.max_epoch = epochs_dict[device]
 
-    main(args)
+        if device in allowed_devices:
+            args.device = device
+        else:
+            raise ValueError(f"Invalid device {device}. Allowed devices are: {', '.join(allowed_devices)}")
+
+        for data in ['../data_plantcyc', '../data_plantcyc_sm_only', '/../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
+            args.data_dir = data
+            args.checkpoint_dir = args.checkpoint_dir + '_untyped_{}_{}'.format(args.device.replace(':', ''), args.max_epoch)
+
+            main(args)

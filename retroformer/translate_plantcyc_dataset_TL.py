@@ -101,7 +101,7 @@ def _test_string_accuracies(args, model_name):
     _, _, model = load_checkpoint(args, model)
     train_accuracy_arc, train_accuracy_brc, train_accuracy_token = validate(model, train_iter, model.embedding_tgt.word_padding_idx)
     val_accuracy_arc, val_accuracy_brc, val_accuracy_token = validate(model, val_iter, model.embedding_tgt.word_padding_idx)
-    test_iter, dataset = build_iterator(args, train=False, sample=False)
+    test_iter, dataset = build_iterator(args, train=False, sample=False, mode='test')
     test_accuracy_arc, test_accuracy_brc, test_accuracy_token = validate(model, test_iter, model.embedding_tgt.word_padding_idx)
 
     model_results = pd.DataFrame({'Model': [model_name], 'Train_Accuracy_Arc': [train_accuracy_arc], 
@@ -242,10 +242,10 @@ def main(args):
                 f.write('Top-{}: {}'.format(j + 1, round(np.mean(accuracy_matrix[:, j]), 4)))
     return
     
-def test_strings_accuracies(max_epoch, checkpoint, checkpoint_dir, data_dir, times=None):
+def test_strings_accuracies(max_epoch, checkpoint, checkpoint_dir, data_dir, device, times=None, lowerlr=None, extralayer=None):
     class Args:
         def __init__(self):
-            self.device = 'cuda'
+            self.device = device
             self.batch_size_trn = 2
             self.batch_size_val = 2
             self.batch_size_token = 4096
@@ -276,6 +276,9 @@ def test_strings_accuracies(max_epoch, checkpoint, checkpoint_dir, data_dir, tim
             self.val_per_step = 2500
             self.verbose = 'False'
             self.times = times
+            self.lowerlr = lowerlr
+            self.extralayer = extralayer
+            self.standard = False
 
     args = Args()
 
@@ -283,6 +286,10 @@ def test_strings_accuracies(max_epoch, checkpoint, checkpoint_dir, data_dir, tim
 
     if args.data_dir.endswith('_sm_only'):
         file_name += '_SMO'
+    elif args.data_dir.endswith('_plantcyc'):
+        file_name += '_plantcyc'
+    elif args.data_dir.endswith('data'):
+        file_name += '_readretro'
 
     if args.lowerlr:
         file_name += f'_{args.times}x_lowerLR'
@@ -332,8 +339,8 @@ if __name__ == "__main__":
             args.checkpoint_dir = f'../checkpoint_retroformer_readretro_{args.max_epoch}_{times}x_lowerLR'
             args.intermediate_dir = '../intermediate_retroformer_readretro'
 
-            for data in ['plantcyc', 'plantcyc_sm_only']:
-                args.data_dir = f'../data_{data}'
+            for data in ['../data_plantcyc', '../data_plantcyc_sm_only', '../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
+                args.data_dir = data
                 main(args)
 
         elif mode_flag == 'extralayer':
@@ -341,7 +348,7 @@ if __name__ == "__main__":
             args.device = device
 
             epochs_dict = {'cuda:3': 700, 'cuda:4': 1000}
-            checkpoint_dict = {'cuda:3': 'model_1767500.pt', 'cuda:4': 'model_1850000.pt'}
+            checkpoint_dict = {'cuda:3': 'model_1775000.pt', 'cuda:4': 'model_1850000.pt'}
 
             if device in epochs_dict and device in checkpoint_dict:
                 args.max_epoch = epochs_dict[device]
@@ -354,7 +361,7 @@ if __name__ == "__main__":
             args.encoder_num_layers = 9
             args.decoder_num_layers = 9
             
-            args.data_dir = '../data_plantcyc'
+            args.data_dir = '../data_plantcyc_sm_only'
             main(args)
 
         elif mode_flag == 'standard':
@@ -363,10 +370,9 @@ if __name__ == "__main__":
             args.extralayer = False
             args.device = device
 
-            epochs_dict = {'cuda:0': 100, 'cuda:1': 300, 'cuda:2': 500, 'cuda:3': 700, 'cuda:4': 1000}
+            epochs_dict = {'cuda:3': 700, 'cuda:4': 1000}
             checkpoint_dict = {
-                'cuda:0': 'model_25000.pt', 'cuda:1': 'model_75000.pt', 'cuda:2': 'model_125000.pt',
-                'cuda:3': 'model_175000.pt', 'cuda:4': 'model_250000.pt'
+                'cuda:3': 'model_1775000.pt', 'cuda:4': 'model_1850000.pt'
             }
 
             if device in allowed_devices:
@@ -379,7 +385,7 @@ if __name__ == "__main__":
             args.checkpoint_dir = f'../checkpoint_retroformer_readretro_{args.max_epoch}'
             args.intermediate_dir = '../intermediate_retroformer_readretro'
             
-            for data in ['plantcyc', 'plantcyc_sm_only']:
+            for data in ['plantcyc_sm_only']:
                 args.data_dir = f'../data_{data}'
                 main(args)
 
@@ -390,6 +396,8 @@ if __name__ == "__main__":
         device = sys.argv[2]
         mode_flag = sys.argv[3].lower()
 
+        allowed_devices = [f'cuda:{i}' for i in range(5)]
+
         if mode_flag == 'lowerlr':
             times = int(sys.argv[4])
             if times not in [10, 100, 1000]:
@@ -397,9 +405,10 @@ if __name__ == "__main__":
         
             args.lowerlr = True
             args.times = times
+            args.device = device
 
             epochs_dict = {'cuda:3': 700, 'cuda:4': 1000}
-            checkpoint_dict = {'cuda:3': 'model_1767500.pt', 'cuda:4': 'model_1850000.pt'}
+            checkpoint_dict = {'cuda:3': 'model_1775000.pt', 'cuda:4': 'model_1850000.pt'}
 
             if device in epochs_dict and device in checkpoint_dict:
                 args.max_epoch = epochs_dict[device]
@@ -410,15 +419,15 @@ if __name__ == "__main__":
             args.checkpoint_dir = f'../checkpoint_retroformer_readretro_{args.max_epoch}_{times}x_lowerLR'
             args.intermediate_dir = '../intermediate_retroformer_readretro'
 
-            for data in ['plantcyc', 'plantcyc_sm_only']:
-                args.data_dir = f'../data_{data}'
-                test_strings_accuracies(args.max_epoch, args.checkpoint, args.checkpoint_dir, args.data_dir, args.times)
+            for data in ['../data_plantcyc', '../data_plantcyc_sm_only', '../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
+                args.data_dir = data
+                test_strings_accuracies(args.max_epoch, args.checkpoint, args.checkpoint_dir, args.data_dir, args.device, args.times, lowerlr = args.lowerlr)
 
         elif mode_flag == 'extralayer':
             args.extralayer = True
 
             epochs_dict = {'cuda:3': 700, 'cuda:4': 1000}
-            checkpoint_dict = {'cuda:3': 'model_1767500.pt', 'cuda:4': 'model_1850000.pt'}
+            checkpoint_dict = {'cuda:3': 'model_1775000.pt', 'cuda:4': 'model_1850000.pt'}
 
             if device in epochs_dict and device in checkpoint_dict:
                 args.max_epoch = epochs_dict[device]
@@ -430,10 +439,10 @@ if __name__ == "__main__":
             args.intermediate_dir = '../intermediate_retroformer_readretro'
             args.encoder_num_layers = 9
             args.decoder_num_layers = 9
-            
-            args.data_dir = '../data_plantcyc'
-            
-            test_strings_accuracies(args.max_epoch, args.checkpoint, args.checkpoint_dir, args.data_dir)
+
+            for data in ['../data_plantcyc', '../data_plantcyc_sm_only', '../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
+                args.data_dir = data
+                test_strings_accuracies(args.max_epoch, args.checkpoint, args.checkpoint_dir, args.data_dir, args.device, extralayer = args.extralayer)
 
         elif mode_flag == 'standard':
             args.lowerlr = False
@@ -442,8 +451,7 @@ if __name__ == "__main__":
 
             epochs_dict = {'cuda:0': 100, 'cuda:1': 300, 'cuda:2': 500, 'cuda:3': 700, 'cuda:4': 1000}
             checkpoint_dict = {
-                'cuda:0': 'model_25000.pt', 'cuda:1': 'model_75000.pt', 'cuda:2': 'model_125000.pt',
-                'cuda:3': 'model_175000.pt', 'cuda:4': 'model_250000.pt'
+                'cuda:3': 'model_1775000.pt', 'cuda:4': 'model_1850000.pt'
             }
 
             if device in allowed_devices:
@@ -455,10 +463,10 @@ if __name__ == "__main__":
 
             args.checkpoint_dir = f'../checkpoint_retroformer_readretro_{args.max_epoch}'
             args.intermediate_dir = '../intermediate_retroformer_readretro'
-            
-            for data in ['plantcyc', 'plantcyc_sm_only']:
-                args.data_dir = f'../data_{data}'
-                test_strings_accuracies(args.max_epoch, args.checkpoint, args.checkpoint_dir, args.data_dir)
+
+            for data in ['../data_plantcyc', '../data_plantcyc_sm_only', '../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
+                args.data_dir = data
+                test_strings_accuracies(args.max_epoch, args.checkpoint, args.checkpoint_dir, args.data_dir, args.device)
 
         else:
             raise ValueError(f"Invalid mode flag {mode_flag}.")

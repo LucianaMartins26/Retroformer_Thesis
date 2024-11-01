@@ -17,17 +17,23 @@ custom_labels = [
     '1000Epochs'
 ]
 
+axis_label_fontsize = 14
+ticks_fontsize = 12
+legend_fontsize = 14
+title_fontsize = 18
+
 plt.figure(figsize=(10, 6))
 for file, label in zip(files, custom_labels):
     df = pd.read_csv(file)
-    plt.plot(df['epoch'], df['accuracy_token'], label=label)
+    plt.plot(df['epoch'].values, df['accuracy_token'].values, label=label)
 
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy Token')
-plt.title('Validation Accuracy Token over Epochs')
-plt.legend(loc='best')
+plt.xlabel('Epoch', fontsize=axis_label_fontsize)
+plt.ylabel('Token Accuracy', fontsize=axis_label_fontsize)
+plt.title('Token Accuracy for PlantCyc Validation Set over Epochs', fontsize=title_fontsize)
+plt.legend(loc='best', fontsize=legend_fontsize)
 plt.grid(True)
-plt.xticks([100, 300, 500, 700, 1000])
+plt.xticks([100, 300, 500, 700, 1000], fontsize=ticks_fontsize)
+plt.yticks(fontsize=ticks_fontsize)
 plt.xlim(0, 1000)
 plt.ylim(0.825, 0.975)
 
@@ -37,14 +43,15 @@ plt.show()
 plt.figure(figsize=(10, 6))
 for file, label in zip(files, custom_labels):
     df = pd.read_csv(file)
-    plt.plot(df['epoch'], df['accuracy_arc'], label=label)
+    plt.plot(df['epoch'].values, df['accuracy_arc'].values, label=label)
 
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy ARC')
-plt.title('Validation Accuracy ARC over Epochs')
-plt.legend(loc='best')
+plt.xlabel('Epoch', fontsize=axis_label_fontsize)
+plt.ylabel('ARC Accuracy', fontsize=axis_label_fontsize)
+plt.title('ARC Accuracy for PlantCyc Validation Set over Epochs', fontsize=title_fontsize)
+plt.legend(loc='best', fontsize=legend_fontsize)
 plt.grid(True)
-plt.xticks([100, 300, 500, 700, 1000])
+plt.xticks([100, 300, 500, 700, 1000], fontsize=ticks_fontsize)
+plt.yticks(fontsize=ticks_fontsize)
 plt.xlim(0, 1000)
 plt.ylim(0.875, 0.925)
 
@@ -54,14 +61,15 @@ plt.show()
 plt.figure(figsize=(10, 6))
 for file, label in zip(files, custom_labels):
     df = pd.read_csv(file)
-    plt.plot(df['epoch'], df['accuracy_brc'], label=label)
+    plt.plot(df['epoch'].values, df['accuracy_brc'].values, label=label)
 
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy BRC')
-plt.title('Validation Accuracy BRC over Epochs')
-plt.legend(loc='best')
+plt.xlabel('Epoch', fontsize=axis_label_fontsize)
+plt.ylabel('BRC Accuracy', fontsize=axis_label_fontsize)
+plt.title('BRC Accuracy for PlantCyc Validation Set over Epochs', fontsize=title_fontsize)
+plt.legend(loc='best', fontsize=legend_fontsize)
 plt.grid(True)
-plt.xticks([100, 300, 500, 700, 1000])
+plt.xticks([100, 300, 500, 700, 1000], fontsize=ticks_fontsize)
+plt.yticks(fontsize=ticks_fontsize)
 plt.xlim(0, 1000)
 plt.ylim(0.78, 0.85)
 

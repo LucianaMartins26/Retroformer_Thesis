@@ -17,17 +17,24 @@ custom_labels = [
     '1000Epochs'
 ]
 
+axis_label_fontsize = 14
+ticks_fontsize = 12
+legend_fontsize = 14
+title_fontsize = 18
+
 plt.figure(figsize=(10, 6))
 
 for file, label in zip(files, custom_labels):
     df = pd.read_csv(file)
-    plt.plot(df['Epoch'], df['Loss'], label=label)
+    plt.plot(df['Epoch'].values, df['Loss'].values, label=label)
 
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.title('Loss over Epochs')
-plt.legend(loc='best')
+plt.xlabel('Epoch', fontsize=axis_label_fontsize)
+plt.ylabel('Loss', fontsize=axis_label_fontsize)
+plt.title('Loss over Epochs', fontsize=title_fontsize)
+plt.legend(loc='best', fontsize=legend_fontsize)
 plt.grid(True)
+plt.xticks(fontsize=ticks_fontsize)
+plt.yticks(fontsize=ticks_fontsize)
 
 plt.xticks([100, 300, 500, 700, 1000])
 

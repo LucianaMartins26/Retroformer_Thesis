@@ -101,7 +101,7 @@ def _test_string_accuracies(args, model_name):
     _, _, model = load_checkpoint(args, model)
     train_accuracy_arc, train_accuracy_brc, train_accuracy_token = validate(model, train_iter, model.embedding_tgt.word_padding_idx)
     val_accuracy_arc, val_accuracy_brc, val_accuracy_token = validate(model, val_iter, model.embedding_tgt.word_padding_idx)
-    test_iter, dataset = build_iterator(args, train=False, sample=False)
+    test_iter, dataset = build_iterator(args, train=False, sample=False, mode='test')
     test_accuracy_arc, test_accuracy_brc, test_accuracy_token = validate(model, test_iter, model.embedding_tgt.word_padding_idx)
 
     model_results = pd.DataFrame({'Model': [model_name], 'Train_Accuracy_Arc': [train_accuracy_arc], 
@@ -232,17 +232,17 @@ def main(args):
                 f.write('Top-{}: {}'.format(j + 1, round(np.mean(accuracy_matrix[:, j]), 4)))
     return
     
-def test_strings_accuracies(max_epoch):
+def test_strings_accuracies(device, max_epoch, data_dir, checkpoint):
     class Args:
         def __init__(self):
-            self.device = 'cuda'
+            self.device = device
             self.batch_size_trn = 4
             self.batch_size_val = 4
             self.batch_size_token = 4096
-            self.data_dir = '../data_plantcyc'
+            self.data_dir = data_dir
             self.intermediate_dir = '../intermediate'
-            self.checkpoint_dir = '../checkpoint_untyped'
-            self.checkpoint = None
+            self.checkpoint_dir = f'../checkpoint_untyped_cuda4_{max_epoch}'
+            self.checkpoint = checkpoint
             self.encoder_num_layers = 8
             self.decoder_num_layers = 8
             self.d_model = 256
@@ -258,11 +258,15 @@ def test_strings_accuracies(max_epoch):
             self.save_per_step = 2500
             self.val_per_step = 2500
             self.verbose = 'False'
-            self.times = times
 
     args = Args()
 
     file_name = f'{args.max_epoch}_epochs'
+
+    if args.data_dir.endswith('_sm_only'):
+        file_name += '_SMO'
+    elif args.data_dir.endswith('_plantcyc'):
+        file_name += '_plantcyc'
 
     dataframe = _test_string_accuracies(args, file_name.replace('_', ' '))
     dataframe.to_csv(f'../result/{file_name}.csv')
@@ -286,19 +290,25 @@ if __name__ == "__main__":
             args.max_epoch = epochs_dict[device]
         else:
             raise ValueError(f"Invalid device {device}. Allowed devices are: {', '.join(allowed_devices)}")
-
-        main(args)
+        
+        for data in ['plantcyc', 'plantcyc_sm_only']:
+            args.data_dir = f'../data_{data}'
+            main(args)
 
     else:
         device = sys.argv[2]
         allowed_devices = [f'cuda:{i}' for i in range(5)]
 
         epochs_dict = {'cuda:0': 100, 'cuda:1': 300, 'cuda:2': 500, 'cuda:3': 700, 'cuda:4': 1000}
+        checkpoint_dict = {'cuda:0': 'model_25000.pt', 'cuda:1': 'model_75000.pt', 'cuda:2': 'model_125000.pt', 'cuda:3': 'model_175000.pt', 'cuda:4': 'model_250000.pt'}
 
         if device in allowed_devices:
             args.device = device
             args.max_epoch = epochs_dict[device]
+            args.checkpoint = checkpoint_dict[device]
         else:
             raise ValueError(f"Invalid device {device}. Allowed devices are: {', '.join(allowed_devices)}")
 
-        test_strings_accuracies(args.max_epoch)
+        for data in ['../data_plantcyc', '../data_plantcyc_sm_only']:
+            args.data_dir = data
+            test_strings_accuracies(args.device, 1000, args.data_dir, 'model_250000.pt')

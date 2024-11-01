@@ -101,7 +101,7 @@ def _test_string_accuracies(args, model_name):
     _, _, model = load_checkpoint(args, model)
     train_accuracy_arc, train_accuracy_brc, train_accuracy_token = validate(model, train_iter, model.embedding_tgt.word_padding_idx)
     val_accuracy_arc, val_accuracy_brc, val_accuracy_token = validate(model, val_iter, model.embedding_tgt.word_padding_idx)
-    test_iter, dataset = build_iterator(args, train=False, sample=False)
+    test_iter, dataset = build_iterator(args, train=False, sample=False, mode='test')
     test_accuracy_arc, test_accuracy_brc, test_accuracy_token = validate(model, test_iter, model.embedding_tgt.word_padding_idx)
 
     model_results = pd.DataFrame({'Model': [model_name], 'Train_Accuracy_Arc': [train_accuracy_arc], 
@@ -209,6 +209,8 @@ def main(args):
 
         if args.data_dir.endswith('_plantcyc'):
             file_name += '_plantcyc'
+        elif args.data_dir.endswith('data'):
+            file_name += '_readretro'
 
         file_name += f'_{mode}_data.txt'
         output_path = os.path.join(args.intermediate_dir, file_name)
@@ -232,17 +234,17 @@ def main(args):
                 f.write('Top-{}: {}'.format(j + 1, round(np.mean(accuracy_matrix[:, j]), 4)))
     return
     
-def test_strings_accuracies(data_dir):
+def test_strings_accuracies(device, data_dir):
     class Args:
         def __init__(self):
-            self.device = 'cuda'
+            self.device = device
             self.batch_size_trn = 2
             self.batch_size_val = 2
             self.batch_size_token = 4096
             self.data_dir = data_dir
             self.intermediate_dir = '../intermediate_retroformer_readretro'
-            self.checkpoint_dir = '../../../READRetro/retroformer/saved_models'
-            self.checkpoint = "biochem.pt"
+            self.checkpoint_dir = '../checkpoint_retroformer_readretro_merge_dataset'
+            self.checkpoint = 'model_1600000.pt'
             self.encoder_num_layers = 8
             self.decoder_num_layers = 8
             self.d_model = 256
@@ -261,12 +263,12 @@ def test_strings_accuracies(data_dir):
 
     args = Args()
 
-    file_name = 'original_biochem_accuracies'
+    file_name = 'merge_dataset_accuracies'
 
-    if args.data_dir.endswith('_sm_only'):
-        file_name += '_SMO'
+    if args.data_dir.endswith('_plantcyc'):
+        file_name += '_plantcyc'
     elif args.data_dir.endswith('data'):
-        file_name += 'biochem_training_data'
+        file_name += '_readretro_training_data'
 
     dataframe = _test_string_accuracies(args, file_name.replace('_', ' '))
     dataframe.to_csv(f'../result/{file_name}.csv')
@@ -285,8 +287,8 @@ if __name__ == "__main__":
         else:
             raise ValueError(f"Invalid device {device}. Allowed devices are: {', '.join(allowed_devices)}")
 
-        for data in ['plantcyc', 'merge_dataset']:
-            args.data_dir = f'../data_{data}'
+        for data in ['../data_plantcyc', '../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
+            args.data_dir = data
             main(args)
 
     else:
@@ -297,4 +299,6 @@ if __name__ == "__main__":
         if device in allowed_devices:
             args.device = device
 
-        test_strings_accuracies(args.data_dir)
+        for data in ['../data_plantcyc', '../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
+            args.data_dir = data
+            test_strings_accuracies(args.device, args.data_dir)
