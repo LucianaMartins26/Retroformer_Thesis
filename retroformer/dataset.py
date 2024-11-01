@@ -24,8 +24,8 @@ def gaussian(x, mean, amplitude, standard_deviation):
 class RetroDataset(Dataset):
     def __init__(self, mode, data_folder='./data', intermediate_folder='./intermediate',
                  known_class=False, shared_vocab=False, augment=False, sample=False):
+                 
         self.data_folder = data_folder
-
         assert mode in ['train', 'test', 'val']
         self.BondTypes = ['NONE', 'AROMATIC', 'DOUBLE', 'SINGLE', 'TRIPLE']
         self.bondtoi = {bond: i for i, bond in enumerate(self.BondTypes)}
@@ -35,6 +35,7 @@ class RetroDataset(Dataset):
         self.known_class = known_class
         self.shared_vocab = shared_vocab
         print('Building {} data from: {}'.format(mode, data_folder))
+
         vocab_file = ''
         if 'full' in self.data_folder:
             vocab_file = 'full_'
@@ -53,19 +54,23 @@ class RetroDataset(Dataset):
             if sample:
                 self.data = self.data.sample(n=200, random_state=0)
                 self.data.reset_index(inplace=True, drop=True)
+            print(f"Loaded {len(self.data)} samples from {mode} data.")
         else:
             train_data = pd.read_csv(os.path.join(data_folder, 'raw_train.csv'))
             val_data = pd.read_csv(os.path.join(data_folder, 'raw_val.csv'))
+            print("Train and validation data loaded.")
             if sample:
                 train_data = train_data.sample(n=1000, random_state=0)
                 train_data.reset_index(inplace=True, drop=True)
                 val_data = val_data.sample(n=200, random_state=0)
                 val_data.reset_index(inplace=True, drop=True)
+            print(f"Sampled {len(train_data)} train and {len(val_data)} validation samples.")
             if vocab_file not in os.listdir(intermediate_folder):
                 print('Building vocab...')
                 raw_data = pd.concat([val_data, train_data])
                 raw_data.reset_index(inplace=True, drop=True)
                 prods, reacts = self.build_vocab_from_raw_data(raw_data)
+                print('Vocabulary built from raw data.')
                 if self.shared_vocab:  # Shared src and tgt vocab
                     itos = set()
                     for i in range(len(prods)):
@@ -88,27 +93,32 @@ class RetroDataset(Dataset):
                         list(self.tgt_itos))
                 self.src_stoi = {self.src_itos[i]: i for i in range(len(self.src_itos))}
                 self.tgt_stoi = {self.tgt_itos[i]: i for i in range(len(self.tgt_itos))}
-
                 with open(os.path.join(intermediate_folder, vocab_file), 'wb') as f:
                     pickle.dump([self.src_itos, self.tgt_itos], f)
+                print('Vocabulary saved.')
             else:
                 with open(os.path.join(intermediate_folder, vocab_file), 'rb') as f:
                     self.src_itos, self.tgt_itos = pickle.load(f)
-
                 self.src_stoi = {self.src_itos[i]: i for i in range(len(self.src_itos))}
                 self.tgt_stoi = {self.tgt_itos[i]: i for i in range(len(self.tgt_itos))}
+                print('Vocabulary loaded.')
 
             self.data = eval('{}_data'.format(mode))
+            print(f"Loaded {len(self.data)} samples from combined data.")
 
         # Build and load processed data into lmdb
-        if 'cooked_{}.lmdb'.format(self.mode) not in os.listdir(self.data_folder):
+        if 'cooked_{}_biochem.lmdb'.format(self.mode) not in os.listdir(self.data_folder):
+            print('Building processed data...')
             self.build_processed_data(self.data)
-        self.env = lmdb.open(os.path.join(self.data_folder, 'cooked_{}.lmdb'.format(self.mode)),
+            print('Processed data built.')
+        self.env = lmdb.open(os.path.join(self.data_folder, 'cooked_{}_biochem.lmdb'.format(self.mode)),
                              max_readers=1, readonly=True,
                              lock=False, readahead=False, meminit=False)
+        print('LMDB environment opened.')
 
         with self.env.begin(write=False) as txn:
             self.product_keys = list(txn.cursor().iternext(values=False))
+        print(f"Loaded {len(self.product_keys)} product keys.")
 
         self.factor_func = lambda x: (1 + gaussian(x, 5.55391565, 0.27170542, 1.20071279)) # pre-computed
 
@@ -127,12 +137,12 @@ class RetroDataset(Dataset):
             prods.append(src)
             reacts.append(tgt)
         return prods, reacts
-
+        
     def build_processed_data(self, raw_data):
         raw_data.reset_index(inplace=True, drop=True)
         reactions = raw_data['reactants>reagents>production'].to_list()
 
-        env = lmdb.open(os.path.join(self.data_folder, 'cooked_{}.lmdb'.format(self.mode)),
+        env = lmdb.open(os.path.join(self.data_folder, 'cooked_{}_biochem.lmdb'.format(self.mode)),
                         map_size=1099511627776)
 
         with env.begin(write=True) as txn:
@@ -158,12 +168,13 @@ class RetroDataset(Dataset):
                     }
                     try:
                         txn.put(p_key.encode(), pickle.dumps(processed))
-                    except:
-                        print('Error processing index {} and product {}'.format(i, p_key))
-                        continue
+                        # print(f"Processed and stored reaction {i}")
+                    except Exception as e:
+                        print(f"Error processing index {i} and product {p_key}: {e}")
                 else:
-                    print('Warning. Process Failed.')
+                    print(f"Warning. Process Failed for reaction {i}: {rxn}")
 
+        print("Finished building processed data.")
         return
 
     def parse_smi_wrapper(self, task):

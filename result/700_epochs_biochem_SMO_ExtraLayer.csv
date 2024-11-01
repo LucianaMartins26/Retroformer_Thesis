@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,700 epochs biochem SMO ExtraLayer,0.9427033492822966,0.8941790133732868,0.9855983853340149,0.9318429661941112,0.8723261471353074,0.9874883890151978,0.9363199081053917,0.8851516634050881,0.983414888381958

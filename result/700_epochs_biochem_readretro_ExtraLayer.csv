@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,700 epochs biochem readretro ExtraLayer,0.8862644458662049,0.7376351607235613,0.9176414012908936,0.8558978237700691,0.6619920449419773,0.914277195930481,0.8558978237700691,0.6619920449419773,0.914277195930481

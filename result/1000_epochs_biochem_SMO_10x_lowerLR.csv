@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,1000 epochs biochem SMO 10times lowerLR,0.9563509954203545,0.9151267965151767,0.9892571568489075,0.9448564158487822,0.8992534183373878,0.9905581474304199,0.9500682030296503,0.9028864970645792,0.9865869283676147

@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,700 epochs biochem plantcyc ExtraLayer,0.9520144264602393,0.924079623112911,0.9883645176887512,0.9214983232446797,0.8321463623323351,0.9732696413993835,0.9243222929806921,0.8376639234169333,0.9763500094413757

@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: retroformer
+Version: 0.0.1
+Summary: Retroformer
+Author: Yue Wan
+Author-email: wanyue1996@gmail.com
+License: MIT
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: lmdb
+
+Retroformer

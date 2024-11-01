@@ -15,8 +15,10 @@ from retroformer.models.model import RetroModel
 def load_checkpoint(args, model):
     checkpoint_path = os.path.join(args.checkpoint_dir, args.checkpoint)
     print('Loading checkpoint from {}'.format(checkpoint_path))
-    checkpoint = torch.load(checkpoint_path)
-    model.load_state_dict(checkpoint['model'])
+    # checkpoint = torch.load(checkpoint_path)
+    # model.load_state_dict(checkpoint['model'])
+    checkpoint = torch.load(checkpoint_path, map_location=args.device)
+    model.load_state_dict(checkpoint['model'], strict=False)
     optimizer = checkpoint['optim']
     step = checkpoint['step']
     step += 1
@@ -38,7 +40,7 @@ def build_model(args, vocab_itos_src, vocab_itos_tgt):
     return model.to(args.device)
 
 
-def build_iterator(args, train=True, sample=False, augment=False):
+def build_iterator(args, train=True, sample=False, augment=False, mode=None):
     if train:
         dataset = RetroDataset(mode='train', data_folder=args.data_dir,
                                intermediate_folder=args.intermediate_dir,
@@ -49,14 +51,16 @@ def build_iterator(args, train=True, sample=False, augment=False):
                                    known_class=args.known_class == 'True',
                                    shared_vocab=args.shared_vocab == 'True', sample=sample)
         src_pad, tgt_pad = dataset.src_stoi['<pad>'], dataset.tgt_stoi['<pad>']
-        train_iter = DataLoader(dataset, batch_size=args.batch_size_trn, shuffle=not sample,  # num_workers=8,
+        train_iter = DataLoader(dataset, batch_size=args.batch_size_trn, shuffle=not sample, #num_workers=8,
                                 collate_fn=partial(collate_fn, src_pad=src_pad, tgt_pad=tgt_pad, device=args.device))
-        val_iter = DataLoader(dataset_val, batch_size=args.batch_size_val, shuffle=False,  # num_workers=8,
+        val_iter = DataLoader(dataset_val, batch_size=args.batch_size_val, shuffle=False, #num_workers=8,
                               collate_fn=partial(collate_fn, src_pad=src_pad, tgt_pad=tgt_pad, device=args.device))
+
+        
         return train_iter, val_iter, dataset.src_itos, dataset.tgt_itos
 
     else:
-        dataset = RetroDataset(mode='test', data_folder=args.data_dir,
+        dataset = RetroDataset(mode=mode, data_folder=args.data_dir,
                                intermediate_folder=args.intermediate_dir,
                                known_class=args.known_class == 'True',
                                shared_vocab=args.shared_vocab == 'True')

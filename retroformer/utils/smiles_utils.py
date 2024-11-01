@@ -12,7 +12,6 @@ from tqdm import tqdm
 BONDTYPES = ['NONE', 'AROMATIC', 'DOUBLE', 'SINGLE', 'TRIPLE']
 BONDTOI = {bond: i for i, bond in enumerate(BONDTYPES)}
 
-
 class SmilesGraph:
     def __init__(self, smi, existing=None):
         self.V = len(smi_tokenizer(smi))
@@ -90,11 +89,11 @@ class SmilesGraph:
             neighbor_bonds_attributes = neighbor_bonds_attributes_list[ni]
             cur_i, cand_js, order = -1, [], []
             for j in range(len(neighbor_tagged_tokens)):
-                if re.match('\[.*:1\]', neighbor_tagged_tokens[j]):
+                if re.match(r'\[.*:1\]', neighbor_tagged_tokens[j]):
                     cur_i = j
-                if re.match('\[.*:90[0-9]\]', neighbor_tagged_tokens[j]):
+                if re.match(r'\[.*:90[0-9]\]', neighbor_tagged_tokens[j]):
                     cand_js.append(j)
-                    order.append(int(re.match('\[.*:(90[0-9])\]', neighbor_tagged_tokens[j]).group(1)) - 900)
+                    order.append(int(re.match(r'\[.*:(90[0-9])\]', neighbor_tagged_tokens[j]).group(1)) - 900)
             if cur_i > -1:
                 assert len(neighbor_bonds) == len(cand_js)
                 neighbor_bonds = list(np.array(neighbor_bonds)[order])
@@ -175,7 +174,7 @@ def get_reaction_centers_from_template(src_smiles, blank_src_smiles, graph_pack,
                 token_match_indices = []
                 for index in match:
                     atom_smarts = mol.GetAtomWithIdx(index).GetSmarts()
-                    token_match_indices.append(int(re.match('.*:([0-9]+)\]', atom_smarts).group(1)))
+                    token_match_indices.append(int(re.match(r'.*:([0-9]+)\]', atom_smarts).group(1)))
                 if tuple(sorted(token_match_indices)) not in potential_rcs:
                     score = get_cc_score(token_match_indices, graph_pack) / get_norm(token_match_indices, graph_pack)
                     potential_rcs[tuple(sorted(token_match_indices))] = score
@@ -347,7 +346,7 @@ def add_mapping(token, map_num=1):
     if not re.match('.*[a-zA-Z].*', token):
         return token
     if token[0] == '[':
-        if re.match('\[.*:[1-9]+\]', token):
+        if re.match(r'\[.*:[1-9]+\]', token):
             result = token
         else:
             result = token.replace(']', ':{}]'.format(map_num))
@@ -365,13 +364,13 @@ def clear_map_number(smi):
     return canonical_smiles(Chem.MolToSmiles(mol))
 
 
-def canonical_smiles(smi):
+def canonical_smiles(smi, isomeric=True):
     """Canonicalize a SMILES without atom mapping"""
     mol = Chem.MolFromSmiles(smi)
     if mol is None:
         return smi
     else:
-        canonical_smi = Chem.MolToSmiles(mol)
+        canonical_smi = Chem.MolToSmiles(mol, isomericSmiles=isomeric)
         # print('>>', canonical_smi)
         if '.' in canonical_smi:
             canonical_smi_list = canonical_smi.split('.')
@@ -426,12 +425,13 @@ def canonical_smiles_with_am(smi):
 
 def smi_tokenizer(smi):
     """Tokenize a SMILES sequence or reaction"""
-    pattern = "(\[[^\]]+]|Bi|Br?|Ge|Te|Mo|K|Ti|Zr|Y|Na|125I|Al|Ce|Cr|Cl?|Ni?|O|S|Pd?|Fe?|I|b|c|Mn|n|o|s|<unk>|>>|Li|p|\(|\)|\.|=|#|-|\+|\\\\|\/|:|@|\?|>|\*|\$|\%[0-9]{2}|[0-9])"
+    smi_no_spaces = smi.replace(' ', '')
+    pattern = r"(\[[^\]]+]|Bi|Br?|Ge|Te|Mo|K|Ti|Zr|Y|Na|125I|Al|Ce|Cr|Cl?|Ni?|O|S|Pd?|Fe?|I|b|c|Mn|n|o|s|<unk>|>>|Li|p|\(|\)|\.|=|#|-|\+|\\\\|\/|:|@|\?|>|\*|\$|\%[0-9]{2}|[0-9]|\\)"
     regex = re.compile(pattern)
-    tokens = [token for token in regex.findall(smi)]
-    if smi != ''.join(tokens):
-        print('ERROR:', smi, ''.join(tokens))
-    assert smi == ''.join(tokens)
+    tokens = [token for token in regex.findall(smi_no_spaces)]
+    if smi_no_spaces != ''.join(tokens):
+        print('ERROR:', smi_no_spaces, ''.join(tokens))
+    assert smi_no_spaces == ''.join(tokens)
     return tokens
 
 
@@ -443,7 +443,7 @@ def remove_am_without_canonical(smi_am, force_canonical=False):
     """
 
     def check_special_token(token):
-        pattern = "(Mg|Zn|Si|Sn|Se|se|Ge|K|Ti|Pd|Mo|Ce|Ta|As|te|Pb|Ru|Ag|W|Pt|Co|Ca|Xe|11CH3|Rh|Tl|V|131I|Re|13c|siH|La|pH|Y|Zr|Bi|125I|Sb|Te|Ni|Fe|Mn|Cr|Al|Na|Li|Cu|nH[0-9]?|NH[1-9]?\+|\+|-|@|PH[1-9]?)"
+        pattern = r"(Mg|Zn|Si|Sn|Se|se|Ge|K|Ti|Pd|Mo|Ce|Ta|As|te|Pb|Ru|Ag|W|Pt|Co|Ca|Xe|11CH3|Rh|Tl|V|131I|Re|13c|siH|La|pH|Y|Zr|Bi|125I|Sb|Te|Ni|Fe|Mn|Cr|Al|Na|Li|Cu|nH[0-9]?|NH[1-9]?\+|\+|-|@|PH[1-9]?)"
         regex = re.compile(pattern)
         return regex.findall(token)
 
@@ -454,7 +454,7 @@ def remove_am_without_canonical(smi_am, force_canonical=False):
             # print(token)
             token = token.replace(re.match('.*(:[0-9]+)]', token).group(1), '')
             explicitHs = re.match('.*(H[1-9]?).*', token)
-            onlyH = re.match('\[[1-9]?H', token)
+            onlyH = re.match(r'\[[1-9]?H', token)
             if explicitHs and not check_special_token(token) and not onlyH:
                 token = token.replace(explicitHs.group(1), '')[1:-1]
             elif not check_special_token(token) and not onlyH:

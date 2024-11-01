@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,1000 epochs biochem lowerLR,0.9737217108240077,0.9586861206593891,0.9938883781433105,0.921624870816021,0.835279462465712,0.9767470955848694,0.9257239200869415,0.8371388800703314,0.9787970185279846

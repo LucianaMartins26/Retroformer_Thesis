@@ -1,0 +1,2 @@
+,Model,Train_Accuracy_Arc,Train_Accuracy_Brc,Train_Accuracy_Token,Val_Accuracy_Arc,Val_Accuracy_Brc,Val_Accuracy_Token,Test_Accuracy_Arc,Test_Accuracy_Brc,Test_Accuracy_Token
+0,700 epochs clean lowerLR,0.9677950588581126,0.9450509075173298,0.9915879368782043,0.9222892455655621,0.8333920527468103,0.9762722849845886,0.9251551438699127,0.8380180224181298,0.9780040979385376
