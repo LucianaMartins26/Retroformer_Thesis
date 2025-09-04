@@ -20,8 +20,8 @@ class Args:
         self.batch_size_val = 2
         self.batch_size_token = 4096
         self.data_dir = None
-        self.intermediate_dir = '../intermediate_retroformer_readretro'
-        self.checkpoint_dir = '../checkpoint_retroformer_readretro_merge_dataset'
+        self.intermediate_dir = '../intermediate_retroformer_readretro_new'
+        self.checkpoint_dir = '../checkpoint_retroformer_readretro_merge_dataset_new'
         self.checkpoint = None
         self.encoder_num_layers = 8
         self.decoder_num_layers = 8
@@ -33,11 +33,15 @@ class Args:
         self.shared_vocab = 'True'
         self.shared_encoder = 'False'
         self.max_epoch = 1000
-        self.max_step = 1600000
+        # self.max_step = 1600000
+        self.max_step = 830000
         self.report_per_step = 200
-        self.save_per_step = 2500
-        self.val_per_step = 10000
+        # self.save_per_step = 2500
+        self.save_per_step = 829999
+        self.val_per_step = 829999
         self.verbose = 'False'
+
+        os.makedirs(self.checkpoint_dir, exist_ok=True)
 
 args = Args()
 
@@ -159,7 +163,7 @@ def main(args):
                 loss_history_brc.append(loss_bond_rc.item())
                 loss_history_align.append(loss_context_align.item())
 
-                csv_file_name = 'log_training_file_retroformer_readretro_merge_dataset.csv'
+                csv_file_name = 'log_training_file_retroformer_merge_dataset.csv'
                 if not os.path.exists(csv_file_name):
                     with open(csv_file_name, 'w', newline='') as csvfile:
                         csv_writer = csv.writer(csvfile)
@@ -210,7 +214,7 @@ def main(args):
                         'accuracy_token': [accuracy_token]
                     })])
  
-                    validation_accuracy_overtime.to_csv('validation_accuracy_overtime_retroformer_readretro_merge_dataset.csv', index=False)
+                    validation_accuracy_overtime.to_csv('validation_accuracy_overtime_retroformer_merge_dataset.csv', index=False)
                     
                     with open(log_file_name, 'a+') as f:
                         f.write(print_line)
@@ -235,7 +239,7 @@ if __name__ == "__main__":
         else:
             raise ValueError(f"Invalid device {device}. Allowed devices are: {', '.join(allowed_devices)}")
 
-        for data in ['../data_plantcyc', '../data_plantcyc_sm_only', '/../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
-            args.data_dir = data
+        # for data in ['../data_plantcyc', '../data_plantcyc_sm_only', '/../../../READRetro/scripts/singlestep_eval/retroformer/biochem/data']:
+        args.data_dir = '../biochem_plantcyc'
 
-            main(args)
+        main(args)

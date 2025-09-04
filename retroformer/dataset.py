@@ -284,6 +284,8 @@ class RetroDataset(Dataset):
                 processed['context_align'], processed['nonreact_mask']
             src_graph = SmilesGraph(p_key, existing=graph_contents)
 
+        if len(src) == 2:
+            print(f"Warning: src with 2 columns for product {processed['raw_product']} and reactants {processed['raw_reactants']}.")
         # Make sure the reaction class is known/unknown
         if self.known_class:
             src[0] = self.src_stoi[processed['reaction_class']]

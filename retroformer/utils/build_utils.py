@@ -111,7 +111,8 @@ def accumulate_batch(true_batch, src_pad=1, tgt_pad=1):
         src, tgt, _, _, _ = batch
         src_max_length = max(src.shape[0], src_max_length)
         tgt_max_length = max(tgt.shape[0], tgt_max_length)
-        entry_count += tgt.shape[1]
+        # entry_count += tgt.shape[1]
+        entry_count += src.shape[1]
 
     new_src = torch.zeros((src_max_length, entry_count)).fill_(src_pad).long()
     new_tgt = torch.zeros((tgt_max_length, entry_count)).fill_(tgt_pad).long()
@@ -126,13 +127,17 @@ def accumulate_batch(true_batch, src_pad=1, tgt_pad=1):
     for i in range(len(true_batch)):
         src, tgt, context_alignment, nonreactive_mask, graph_packs = true_batch[i]
         bond, src_graph = graph_packs
-        new_src[:, batch_size * i: batch_size * (i + 1)][:src.shape[0]] = src
-        new_nonreactive_mask[:, batch_size * i: batch_size * (i + 1)][:nonreactive_mask.shape[0]] = nonreactive_mask
-        new_tgt[:, batch_size * i: batch_size * (i + 1)][:tgt.shape[0]] = tgt
-        new_context_alignment[batch_size * i: batch_size * (i + 1), :context_alignment.shape[1], :context_alignment.shape[2]] = context_alignment
+        try:
+            new_src[:, batch_size * i: batch_size * (i + 1)][:src.shape[0]] = src
+            new_nonreactive_mask[:, batch_size * i: batch_size * (i + 1)][:nonreactive_mask.shape[0]] = nonreactive_mask
+            new_tgt[:, batch_size * i: batch_size * (i + 1)][:tgt.shape[0]] = tgt
+            new_context_alignment[batch_size * i: batch_size * (i + 1), :context_alignment.shape[1], :context_alignment.shape[2]] = context_alignment
 
-        new_bond_matrix[batch_size * i: batch_size * (i + 1), :bond.shape[1], :bond.shape[2]] = bond
-        new_src_graph_list += src_graph
+            new_bond_matrix[batch_size * i: batch_size * (i + 1), :bond.shape[1], :bond.shape[2]] = bond
+            new_src_graph_list += src_graph
+        except Exception as e:
+            print(f"Error processing batch {src.shape}: {e}")
+            print()
 
     return new_src, new_tgt, new_context_alignment, new_nonreactive_mask, \
            (new_bond_matrix, new_src_graph_list)
